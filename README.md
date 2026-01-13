@@ -32,12 +32,27 @@ export OPENAI_API_KEY='your-api-key-here'
 
 ### Usage
 
-Run the agent with the default instruction:
+**Basic usage** (requires OpenAI API key):
 ```bash
 python code_review_agent.py
 ```
 
 This will review `test_script.py` and provide suggestions for improvements.
+
+**Demo without API key** (shows tool functionality):
+```bash
+python demo.py
+```
+
+**Run examples** (see `examples.py` for more):
+```bash
+python examples.py
+```
+
+**Run tests**:
+```bash
+python test_code_review_agent.py
+```
 
 ### How It Works
 
@@ -70,3 +85,26 @@ print(result)
 - **LangChain**: Framework for building LLM-powered applications
 - **OpenAI**: GPT models for natural language understanding
 - **pylint**: Python code linter for identifying quality issues
+
+### Project Structure
+
+```
+codebot/
+├── code_review_agent.py      # Main agent implementation with tools
+├── test_script.py             # Sample Python file with code issues
+├── demo.py                    # Demo script (no API key needed)
+├── examples.py                # Usage examples with different configurations
+├── test_code_review_agent.py # Unit tests for the agent
+├── test_tools.py              # Simple tool testing script
+├── requirements.txt           # Python dependencies
+└── README.md                  # This file
+```
+
+### Implementation Details
+
+The implementation follows the requirements:
+
+1. ✅ **LangChain Tools**: Both `read_code()` and `run_linter()` are decorated with `@tool` from LangChain
+2. ✅ **Agent Initialization**: Uses `ChatOpenAI` with tools bound via `bind_tools()`
+3. ✅ **Natural Language Instructions**: Agent accepts instructions like "Review `test_script.py` and suggest improvements"
+4. ✅ **Autonomous Workflow**: Agent automatically decides when to read files and run linters based on the instruction
