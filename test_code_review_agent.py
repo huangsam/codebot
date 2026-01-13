@@ -6,7 +6,8 @@ Tests the tools and agent structure without requiring an OpenAI API key.
 import os
 import sys
 import unittest
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
+
 from code_review_agent import read_code, run_linter, create_code_review_agent
 
 
@@ -31,16 +32,24 @@ class TestCodeReviewTools(unittest.TestCase):
         self.assertIn("Pylint results for test_script.py", result)
         # The test file should have some linting issues
         self.assertTrue(
-            "trailing-whitespace" in result or 
+            "trailing-whitespace" in result or
             "missing-function-docstring" in result or
             "Your code has been rated" in result
         )
-    
+
     def test_run_linter_file_not_found(self):
         """Test that run_linter handles missing files."""
         result = run_linter.invoke({"file_path": "nonexistent_file.py"})
-        # Pylint will show an error for missing files
-        self.assertIn("Pylint results", result)
+        # Should return an error message for missing files
+        self.assertIn("Error", result)
+        self.assertIn("not found", result)
+
+    def test_run_linter_non_python_file(self):
+        """Test that run_linter rejects non-Python files."""
+        result = run_linter.invoke({"file_path": "README.md"})
+        # Should return an error message for non-Python files
+        self.assertIn("Error", result)
+        self.assertIn("not a Python file", result)
     
     def test_tools_have_correct_names(self):
         """Test that tools have the expected names."""

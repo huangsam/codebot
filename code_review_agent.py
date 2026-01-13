@@ -7,6 +7,7 @@ to provide code review suggestions based on natural language instructions.
 
 import os
 import subprocess
+from pathlib import Path
 from typing import Optional
 
 from langchain_core.messages import HumanMessage
@@ -47,10 +48,19 @@ def run_linter(file_path: str) -> str:
         Linter output with issues found and suggestions
     """
     try:
+        # Validate file path to prevent command injection
+        path = Path(file_path)
+        if not path.exists():
+            return f"Error: File {file_path} not found"
+        if not path.is_file():
+            return f"Error: {file_path} is not a file"
+        if path.suffix not in ['.py', '.pyw']:
+            return f"Error: {file_path} is not a Python file"
+
         # Run pylint with custom options
         # Note: check=False because pylint returns non-zero for code with issues
         result = subprocess.run(
-            ['pylint', file_path, '--output-format=text'],
+            ['pylint', str(path.resolve()), '--output-format=text'],
             capture_output=True,
             text=True,
             timeout=30,
@@ -133,7 +143,7 @@ When reviewing code, you should:
     response = llm_with_tools.invoke(messages)
 
     # Check if tools need to be called
-    if response.tool_calls:
+    if hasattr(response, 'tool_calls') and response.tool_calls:
         print("\n🔧 Agent is using tools...\n")
 
         # Execute tool calls
